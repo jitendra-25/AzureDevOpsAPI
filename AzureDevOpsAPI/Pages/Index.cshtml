@@ -1,0 +1,28 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="container row p-3 mt-5">
+    <table class="table table-secondary table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Repository Name</th>
+                <th>Repository URL</th>
+            </tr>
+        </thead>
+        @foreach(var item in Model.Repositories)
+        {
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    <a href=@item.WebUrl target="_blank">@item.WebUrl</a>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+

@@ -1,0 +1,24 @@
+﻿@page
+@model AzureDevOpsAPI.Pages.PipelinesModel
+
+<div class="container row p-3 mt-5">
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Pipeline Name</th>
+                <th>Pipeline URL</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model.Pipelines)
+        {
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    <a href=@item.URL target="_blank"> @item.URL </a>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
