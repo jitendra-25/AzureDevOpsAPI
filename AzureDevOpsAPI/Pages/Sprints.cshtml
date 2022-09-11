@@ -1,0 +1,29 @@
+﻿@page
+@model AzureDevOpsAPI.Pages.SprintsModel
+
+
+<div class="container row p-3 mt-5">
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th width="33%">Sprint Name</th>
+                <th width="33%">Sprint URL</th>
+                <th width="33%">Sprint Path</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model.Sprints)
+        {
+            <tr>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    <a href=@item.Url target="_blank">@item.Url</a>
+                </td>
+                <td>
+                    @item.Path
+                </td>
+            </tr>
+        }
+    </table>
+</div>

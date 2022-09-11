@@ -9,5 +9,7 @@ namespace AzureDevOpsAPI.Services
         List<GitRepository> GetGitRepos();
 
         List<PipelineEntity> GetPipelines();
+
+        SprintEntity GetSprintData();
     }
 }

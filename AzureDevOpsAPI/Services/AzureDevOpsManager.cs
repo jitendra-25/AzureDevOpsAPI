@@ -1,4 +1,5 @@
-﻿using AzureDevOpsAPI.Models;
+﻿using AzureDevOpsAPI.Helpers;
+using AzureDevOpsAPI.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.Common;
@@ -89,6 +90,33 @@ namespace AzureDevOpsAPI.Services
 
                 return pipelines;
             }
+        }
+
+        public SprintEntity GetSprintData()
+        {
+            //https://dev.azure.com/{organization}/{project}/_apis/work/teamsettings/iterations?api-version=6.0
+
+            string tokenFormat = string.Format("{0}:{1}", "", GetTokenConfig());
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(tokenFormat));
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(DEVOPS_ORG_URL + "/" + GetProjectNameConfig() + "/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+                HttpResponseMessage response = client.GetAsync("_apis/work/teamsettings/iterations?api-version=6.0").Result;
+                if(response.IsSuccessStatusCode)
+                {
+                    var jsonResult = response.Content.ReadAsStringAsync().Result;
+                    SprintEntity sprintEntity = CustomJsonHelper.GetDeserializedJson<SprintEntity>(jsonResult);
+
+                    return sprintEntity;
+                }
+            }
+
+            return null;
         }
     }
 }
