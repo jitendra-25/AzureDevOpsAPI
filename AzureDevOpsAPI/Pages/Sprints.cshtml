@@ -6,12 +6,13 @@
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
-                <th width="33%">Sprint Name</th>
-                <th width="33%">Sprint URL</th>
-                <th width="33%">Sprint Path</th>
+                <th width="15%">Sprint Name</th>
+                <th width="25%">Sprint URL</th>
+                <th width="25%">Sprint Path</th>
+                <th width="35%">Work Item Details</th>
             </tr>
         </thead>
-        @foreach (var item in Model.Sprints)
+        @foreach (var item in Model.SprintEntity.Sprints)
         {
             <tr>
                 <td>
@@ -22,6 +23,14 @@
                 </td>
                 <td>
                     @item.Path
+                </td>
+                <td>
+                @foreach(var workItem in Model.SprintEntity.SprintWorkItems.Where(w => w.SprintName == item.Name))
+                {
+                    <span><b>WorkItem Title: </b> @workItem.fields.SystemTitle</span>
+                    <br/>
+                    <span><b>WorkItem State: </b> @workItem.fields.SystemState</span>
+                }
                 </td>
             </tr>
         }

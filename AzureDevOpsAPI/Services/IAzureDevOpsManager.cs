@@ -11,5 +11,7 @@ namespace AzureDevOpsAPI.Services
         List<PipelineEntity> GetPipelines();
 
         SprintEntity GetSprintData();
+
+        void GetWorkItemsForSprint(SprintEntity sprintEntity);
     }
 }

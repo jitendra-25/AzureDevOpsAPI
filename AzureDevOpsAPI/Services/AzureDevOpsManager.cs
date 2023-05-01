@@ -112,11 +112,51 @@ namespace AzureDevOpsAPI.Services
                     var jsonResult = response.Content.ReadAsStringAsync().Result;
                     SprintEntity sprintEntity = CustomJsonHelper.GetDeserializedJson<SprintEntity>(jsonResult);
 
+                    GetWorkItemsForSprint(sprintEntity);
+
                     return sprintEntity;
                 }
             }
 
             return null;
+        }
+
+        public void GetWorkItemsForSprint(SprintEntity sprintEntity)
+        {
+            string tokenFormat = string.Format("{0}:{1}", "", GetTokenConfig());
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(tokenFormat));
+
+            foreach (Sprint sprintItem in sprintEntity.Sprints)
+            {
+                using (var client = new HttpClient())
+                {
+                    var workItemsUrl = sprintItem.Url + "/workitems";
+
+                    client.BaseAddress = new Uri(DEVOPS_ORG_URL + "/" + GetProjectNameConfig() + "/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+                    //Get List Of WorkItems Relations
+                    HttpResponseMessage response = client.GetAsync(workItemsUrl).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var workItemRelationsJsonResult = response.Content.ReadAsStringAsync().Result;
+                        WorkItemRelationsEntity workItemRelationsEntity = CustomJsonHelper.GetDeserializedJson<WorkItemRelationsEntity>(workItemRelationsJsonResult);
+
+                        foreach(var item in workItemRelationsEntity.workItemRelations)
+                        {
+                            response = client.GetAsync(item.target.url).Result;
+                            var workItemJsonResult = response.Content.ReadAsStringAsync().Result;
+                            WorkItemEntity workItemEntity = CustomJsonHelper.GetDeserializedJson<WorkItemEntity>(workItemJsonResult);
+                            workItemEntity.SprintName = sprintItem.Name;
+
+                            sprintEntity.SprintWorkItems.Add(workItemEntity);
+                        }
+                    }
+                }
+            }
         }
     }
 }

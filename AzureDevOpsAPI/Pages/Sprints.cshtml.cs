@@ -15,11 +15,12 @@ namespace AzureDevOpsAPI.Pages
             this._devOpsManager = devOpsManager;
         }
 
-        public List<Sprint> Sprints { get; set; }
+        //public List<Sprint> Sprints { get; set; }
+        public SprintEntity SprintEntity { get; set; }
 
         public void OnGet()
         {
-            Sprints = _devOpsManager.GetSprintData().Sprints;
+            SprintEntity = _devOpsManager.GetSprintData();
         }
     }
 }

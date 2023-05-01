@@ -10,6 +10,8 @@ namespace AzureDevOpsAPI.Models
         public int Count { get; set; }
         [JsonProperty("value")]
         public List<Sprint> Sprints { get; set; }
+
+        public List<WorkItemEntity> SprintWorkItems { get; set; } = new List<WorkItemEntity>();
     }
 
     public class Sprint
