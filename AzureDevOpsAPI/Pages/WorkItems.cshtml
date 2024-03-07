@@ -1,0 +1,51 @@
+﻿@page
+@model AzureDevOpsAPI.Pages.WorkItemsModel
+@{
+    ViewData["Title"] = "Update Work Items";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @if (Model.WorkItemEntity != null)
+        {
+            <form method="post" style="width:100%">
+                <h3>Work Item ID: Model.WorkItemEntity.id</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="title" class="form-label">Title:</label>
+                        <input type="text" id="title" name="WorkItemEntity.fields.SystemTitle" value="@Model.WorkItemEntity.fields.SystemTitle" class="form-control" /><br />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="type" class="form-label">Type:</label>
+                        <input type="text" id="type" name="WorkItemEntity.fields.SystemWorkItemType" value="@Model.WorkItemEntity.fields.SystemWorkItemType" class="form-control" readonly /><br />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="state" class="form-label">State:</label>
+                        @* <input type="text" id="state" name="WorkItemEntity.fields.SystemState" value="@Model.WorkItemEntity.fields.SystemState" class="form-control" /><br /> *@
+                        <select id="state" name="WorkItemEntity.fields.SystemState" class="form-control">
+                            <option value="New" selected="@(Model.WorkItemEntity.fields.SystemState == "New")">New</option>
+                            <option value="Committed" selected="@(Model.WorkItemEntity.fields.SystemState == "Committed")">Committed</option>
+                            <option value="Active" selected="@(Model.WorkItemEntity.fields.SystemState == "Active")">Active</option>
+                            <option value="Closed" selected="@(Model.WorkItemEntity.fields.SystemState == "Closed")">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <input type="hidden" name="id" value="@Model.WorkItemEntity.id" />
+                <hr />
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Update Work Items</button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <p>No Work Items available.</p>
+        }
+    </div>
+</div>

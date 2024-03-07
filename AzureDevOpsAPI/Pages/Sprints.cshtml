@@ -1,9 +1,11 @@
 ﻿@page
 @model AzureDevOpsAPI.Pages.SprintsModel
-
+@{
+    ViewData["Title"] = "Sprints";
+}
 
 <div class="container row p-3 mt-5">
-    <table class="table table-bordered">
+    <table class="table table-striped table-bordered">
         <thead class="thead-light">
             <tr>
                 <th width="15%">Sprint Name</th>
@@ -25,12 +27,18 @@
                     @item.Path
                 </td>
                 <td>
-                @foreach(var workItem in Model.SprintEntity.SprintWorkItems.Where(w => w.SprintName == item.Name))
-                {
-                    <span><b>WorkItem Title: </b> @workItem.fields.SystemTitle</span>
-                    <br/>
-                    <span><b>WorkItem State: </b> @workItem.fields.SystemState</span>
-                }
+                    @foreach (var workItem in Model.SprintEntity.SprintWorkItems.Where(w => w.SprintName == item.Name))
+                    {
+                        <span><b>WorkItem Title: </b> 
+                            <a asp-page="Sprints" asp-page-handler="UpdateWorkItems" asp-route-workItemId="@workItem.id">@workItem.fields.SystemTitle</a>
+                        </span>
+                        <br />
+
+                        <span><b>WorkItem State: </b> @workItem.fields.SystemState</span>
+
+                        <br />
+                        <br />
+                    }
                 </td>
             </tr>
         }
