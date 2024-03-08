@@ -1,4 +1,5 @@
 using AzureDevOpsAPI.Models;
+using AzureDevOpsAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -9,6 +10,13 @@ namespace AzureDevOpsAPI.Pages
 {
     public class WorkItemsModel : PageModel
     {
+        private readonly IAzureDevOpsManager _devOpsManager;
+
+        public WorkItemsModel(IAzureDevOpsManager devOpsManager)
+        {
+            this._devOpsManager = devOpsManager;
+        }
+
         [BindProperty]
         public WorkItemEntity WorkItemEntity { get; set; }
 
@@ -22,9 +30,12 @@ namespace AzureDevOpsAPI.Pages
 
         public IActionResult OnPost()
         {
-            var updatedWorkItem = this.WorkItemEntity;
+            if (this.WorkItemEntity != null)
+            {
+                _devOpsManager.UpdateWorkItem(this.WorkItemEntity);
+            }
 
-            return RedirectToPage("Index"); // Redirect to the page where the list of WorkItems is displayed
+            return RedirectToPage("Sprints");
         }
     }
 }

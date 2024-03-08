@@ -24,18 +24,28 @@
 
                 <div class="row">
                     <div class="col-md-6">
+                        <label for="description" class="form-label">Description:</label>
+                        <textarea id="description" name="WorkItemEntity.fields.SystemDescription" class="form-control" rows="4" cols="50">
+                            @Model.WorkItemEntity.fields.SystemDescription
+                        </textarea>
+                        <br />
+                    </div>
+
+                    <div class="col-md-6">
                         <label for="state" class="form-label">State:</label>
                         @* <input type="text" id="state" name="WorkItemEntity.fields.SystemState" value="@Model.WorkItemEntity.fields.SystemState" class="form-control" /><br /> *@
                         <select id="state" name="WorkItemEntity.fields.SystemState" class="form-control">
                             <option value="New" selected="@(Model.WorkItemEntity.fields.SystemState == "New")">New</option>
-                            <option value="Committed" selected="@(Model.WorkItemEntity.fields.SystemState == "Committed")">Committed</option>
                             <option value="Active" selected="@(Model.WorkItemEntity.fields.SystemState == "Active")">Active</option>
+                            <option value="Resolved" selected="@(Model.WorkItemEntity.fields.SystemState == "Resolved")">Resolved</option>
                             <option value="Closed" selected="@(Model.WorkItemEntity.fields.SystemState == "Closed")">Closed</option>
+                            <option value="Removed" selected="@(Model.WorkItemEntity.fields.SystemState == "Removed")">Removed</option>
                         </select>
                     </div>
                 </div>
 
-                <input type="hidden" name="id" value="@Model.WorkItemEntity.id" />
+                <input type="hidden" name="WorkItemEntity.id" value="@Model.WorkItemEntity.id" />
+                <input type="hidden" name="WorkItemEntity.rev" value="@Model.WorkItemEntity.rev" />
                 <hr />
 
                 <div class="col-12">

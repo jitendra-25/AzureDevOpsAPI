@@ -39,6 +39,9 @@ namespace AzureDevOpsAPI.Models
         public string SystemTitle { get; set; }
         public string SystemBoardColumn { get; set; }
         public bool SystemBoardColumnDone { get; set; }
+
+        [JsonProperty("System.Description")]
+        public string SystemDescription { get; set; }
         public DateTime MicrosoftVSTSCommonStateChangeDate { get; set; }
         public int MicrosoftVSTSCommonPriority { get; set; }
         public float MicrosoftVSTSCommonStackRank { get; set; }

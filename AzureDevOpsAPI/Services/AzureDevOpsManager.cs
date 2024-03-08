@@ -158,5 +158,62 @@ namespace AzureDevOpsAPI.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Updates a WorkItem
+        /// </summary>
+        /// <param name="workItem">WorkItem object to update</param>
+        /// <returns>WorkItemEntity</returns>
+        public WorkItemEntity UpdateWorkItem(WorkItemEntity workItem)
+        {
+            // Request URI - https://dev.azure.com/DemoJPOrg/DemoAgileProject/_apis/wit/workitems/0?api-version=7.1-preview.3
+
+            string tokenFormat = string.Format("{0}:{1}", "", GetTokenConfig());
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(tokenFormat));
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(DEVOPS_ORG_URL + "/" + GetProjectNameConfig() + "/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+                string uri = $"_apis/wit/workitems/{workItem.id}?api-version=7.1-preview.3";
+
+                var patchOperation = new List<Models.JsonPatchOperation>
+                {
+                    new() {
+                        Op = "test",
+                        Path = "/rev",
+                        Value = workItem.rev
+                    },
+
+                    new() {
+                        Op = "add",
+                        Path = "/fields/System.State",
+                        Value = workItem.fields.SystemState
+                    },
+
+                    new() {
+                        Op = "add",
+                        Path = "/fields/System.Description",
+                        Value = workItem.fields.SystemDescription
+                    }
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(patchOperation);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json-patch+json");
+
+                HttpResponseMessage response = client.PatchAsync(uri, content).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    WorkItemEntity workItemEntity = JsonConvert.DeserializeObject<WorkItemEntity>(responseBody);
+                    return workItemEntity;
+                }
+            }
+
+            return null;
+        }
     }
 }

@@ -24,7 +24,8 @@ namespace AzureDevOpsAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<IAzureDevOpsManager, AzureDevOpsManager>();
-            services.AddRazorPages();
+            services.AddRazorPages().AddSessionStateTempDataProvider();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,6 +41,8 @@ namespace AzureDevOpsAPI
             }
 
             app.UseStaticFiles();
+
+            app.UseSession();
 
             app.UseRouting();
 

@@ -13,5 +13,7 @@ namespace AzureDevOpsAPI.Services
         SprintEntity GetSprintData();
 
         void GetWorkItemsForSprint(SprintEntity sprintEntity);
+
+        WorkItemEntity UpdateWorkItem(WorkItemEntity workItem);
     }
 }
