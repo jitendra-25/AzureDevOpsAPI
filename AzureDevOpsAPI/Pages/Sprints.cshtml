@@ -8,10 +8,11 @@
     <table class="table table-striped table-bordered">
         <thead class="thead-light">
             <tr>
-                <th width="15%">Sprint Name</th>
-                <th width="25%">Sprint URL</th>
-                <th width="25%">Sprint Path</th>
-                <th width="35%">Work Item Details</th>
+                <th width="20%">Sprint Name</th>
+                <th width="15%">Sprint URL</th>
+                <th width="20%">Sprint Path</th>
+                <th width="30%">Work Item Details</th>
+                <th width="15%">Actions</th>
             </tr>
         </thead>
         @foreach (var item in Model.SprintEntity.Sprints)
@@ -39,6 +40,9 @@
                         <br />
                         <br />
                     }
+                </td>
+                <td>
+                    <a class="btn btn-primary" asp-page="AddWorkItem" asp-route-sprintId="@item.Id">Add WorkItem</a>
                 </td>
             </tr>
         }
