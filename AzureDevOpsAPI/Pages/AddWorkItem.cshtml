@@ -6,15 +6,26 @@
 
 <h3>Add Work Item</h3>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label for="Title">Title</label>
         <input type="text" class="form-control" id="Title" name="Title" required />
     </div>
     <div class="form-group">
-        <label for="State">State</label>
-        <input type="text" class="form-control" id="State" name="State" required />
+        <label for="Type">Type</label>
+        <input type="text" class="form-control" id="Type" name="Type" required />
     </div>
-    <input type="hidden" asp-for="SprintId" />
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <input type="text" class="form-control" id="Description" name="Description" required />
+    </div>
+    <div class="form-group">
+        <label for="IterationPath">IterationPath</label>
+        <input type="text" class="form-control" id="IterationPath" name="IterationPath" required />
+    </div>
+    <div class="form-group">
+        <label for="FileUpload">Upload File</label>
+        <input type="file" class="form-control" id="FileUpload" name="FileUpload" accept=".pdf,.doc,.docx,.txt" />
+    </div>
     <button type="submit" class="btn btn-primary">Add Work Item</button>
 </form>

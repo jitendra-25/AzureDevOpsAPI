@@ -1,9 +1,11 @@
 using AzureDevOpsAPI.Models;
 using AzureDevOpsAPI.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 
 namespace AzureDevOpsAPI.Pages
 {
@@ -20,22 +22,19 @@ namespace AzureDevOpsAPI.Pages
         public string Title { get; set; }
 
         [BindProperty]
-        public string State { get; set; }
+        public string Type { get; set; }
 
-        [BindProperty(SupportsGet = true)]
-        [Required]
-        public Guid SprintId { get; set; }
+        [BindProperty]
+        public string Description { get; set; }
+
+        [BindProperty]
+        public string IterationPath { get; set; }
+
+        [BindProperty]
+        public IFormFile FileUpload { get; set; }
 
         public IActionResult OnGet([FromQuery] Guid sprintId)
         {
-            SprintId = sprintId;
-
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            // Additional logic if needed
             return Page();
         }
 
@@ -46,17 +45,28 @@ namespace AzureDevOpsAPI.Pages
                 return Page();
             }
 
+            if (FileUpload != null)
+            {
+                var filePath = Path.Combine("uploads", FileUpload.FileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    FileUpload.CopyTo(stream);
+                }
+            }
+
             var newWorkItem = new WorkItemEntity
             {
                 fields = new Fields
                 {
                     SystemTitle = Title,
-                    SystemState = State,
-                    SystemIterationPath = $"DemoJPOrg\\DemoTeam\\Sprint {SprintId}"
+                    SystemDescription = Description,
+                    SystemWorkItemType = Type,
+                    SystemIterationPath = IterationPath
                 }
             };
 
-            _devOpsManager.UpdateWorkItem(newWorkItem);
+            _devOpsManager.AddWorkItem(newWorkItem, FileUpload);
             return RedirectToPage("Sprints");
         }
     }

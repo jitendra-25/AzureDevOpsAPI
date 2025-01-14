@@ -1,5 +1,6 @@
 ﻿using AzureDevOpsAPI.Helpers;
 using AzureDevOpsAPI.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.Common;
@@ -9,14 +10,16 @@ using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace AzureDevOpsAPI.Services
 {
     public class AzureDevOpsManager : IAzureDevOpsManager
     {
-        const string DEVOPS_ORG_URL = "https://dev.azure.com/{Your_DevOps_OrgURL}";
+        const string DEVOPS_ORG_URL = "https://dev.azure.com/DemoJPOrg";
         private readonly IConfiguration _config;
 
         public AzureDevOpsManager(IConfiguration config)
@@ -107,7 +110,7 @@ namespace AzureDevOpsAPI.Services
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
 
                 HttpResponseMessage response = client.GetAsync("_apis/work/teamsettings/iterations?api-version=6.0").Result;
-                if(response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
                     var jsonResult = response.Content.ReadAsStringAsync().Result;
                     SprintEntity sprintEntity = CustomJsonHelper.GetDeserializedJson<SprintEntity>(jsonResult);
@@ -145,7 +148,7 @@ namespace AzureDevOpsAPI.Services
                         var workItemRelationsJsonResult = response.Content.ReadAsStringAsync().Result;
                         WorkItemRelationsEntity workItemRelationsEntity = CustomJsonHelper.GetDeserializedJson<WorkItemRelationsEntity>(workItemRelationsJsonResult);
 
-                        foreach(var item in workItemRelationsEntity.workItemRelations)
+                        foreach (var item in workItemRelationsEntity.workItemRelations)
                         {
                             response = client.GetAsync(item.target.url).Result;
                             var workItemJsonResult = response.Content.ReadAsStringAsync().Result;
@@ -213,6 +216,109 @@ namespace AzureDevOpsAPI.Services
                 }
             }
 
+            return null;
+        }
+
+        public bool AddWorkItem(WorkItemEntity workItemEntity, IFormFile file)
+        {
+            // Request URI - POST https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/${type}?api-version=7.1
+
+            string tokenFormat = string.Format("{0}:{1}", "", GetTokenConfig());
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(tokenFormat));
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(DEVOPS_ORG_URL + "/" + GetProjectNameConfig() + "/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+                string uri = $"_apis/wit/workitems/${workItemEntity.fields.SystemWorkItemType}?api-version=7.1";
+
+                var patchOperation = new List<Models.JsonPatchOperation>
+                {
+                    new() {
+                        Op = "add",
+                        Path = "/fields/System.Title",
+                        Value = workItemEntity.fields.SystemTitle
+                    },
+                    new() {
+                        Op = "add",
+                        Path = "/fields/System.Description",
+                        Value = workItemEntity.fields.SystemDescription
+                    },
+                    new() {
+                        Op = "add",
+                        Path = "/fields/System.IterationPath",
+                        Value = workItemEntity.fields.SystemIterationPath                        
+                    }
+                };
+
+                // Upload Attachment
+                if (file != null)
+                {
+                    string attachmentUrl = UploadAttachment(file);
+                    if(!string.IsNullOrEmpty(attachmentUrl))
+                    {
+                        patchOperation.Add(new Models.JsonPatchOperation
+                        {
+                            Op = "add",
+                            Path = "/relations/-",
+                            Value = new
+                            {
+                                rel = "AttachedFile",
+                                url = attachmentUrl,
+                                attributes = new { comment = "Uploaded file" }
+                            }
+                        });
+                    }
+                }
+
+                var jsonContent = JsonConvert.SerializeObject(patchOperation);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json-patch+json");
+
+                HttpResponseMessage response = client.PostAsync(uri, content).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private string UploadAttachment(IFormFile file)
+        {
+            // Request URI - POST https://dev.azure.com/{organization}/{project}/_apis/wit/attachments?fileName={fileName}&api-version=7.1
+
+            string tokenFormat = string.Format("{0}:{1}", "", GetTokenConfig());
+            string credentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(tokenFormat));
+
+            using (var client = new HttpClient())
+            {
+                string areaPath = GetProjectNameConfig();
+
+                client.BaseAddress = new Uri(DEVOPS_ORG_URL + "/" + GetProjectNameConfig() + "/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+
+                string filePath = Path.Combine("uploads", file.FileName);
+                using (var content = new StreamContent(File.OpenRead(filePath)))
+                {
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    string uri = $"_apis/wit/attachments?fileName={file.FileName}&api-version=7.1";
+
+                    HttpResponseMessage response = client.PostAsync(uri, content).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonResult = response.Content.ReadAsStringAsync().Result;
+                        dynamic deserializedJson = JsonConvert.DeserializeObject<ExpandoObject>(jsonResult, new ExpandoObjectConverter());
+                        return deserializedJson.url;
+                    }
+                }
+            }
             return null;
         }
     }
