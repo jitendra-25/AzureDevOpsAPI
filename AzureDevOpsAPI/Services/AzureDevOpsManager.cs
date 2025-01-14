@@ -19,7 +19,7 @@ namespace AzureDevOpsAPI.Services
 {
     public class AzureDevOpsManager : IAzureDevOpsManager
     {
-        const string DEVOPS_ORG_URL = "https://dev.azure.com/DemoJPOrg";
+        const string DEVOPS_ORG_URL = "https://dev.azure.com/{Your_DevOps_OrgURL}";
         private readonly IConfiguration _config;
 
         public AzureDevOpsManager(IConfiguration config)
